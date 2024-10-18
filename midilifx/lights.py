@@ -100,6 +100,7 @@ class LifxLight:
         ip = await self._get_local_ip()
         self.light_discovery.start(ip)
         self.bulb = await self.lights.wait_for_light()
+        assert not self.bulb_update_task.done(), self.bulb_update_task.result()
         return self
 
     def _schedule_update(self, now: Callable[[], float] = time.time):
@@ -122,7 +123,6 @@ class LifxLight:
 
     async def _update_bulb_forever(self):
         """Sends the current color to the bulb each time _state.needs_update is set."""
-        assert self.bulb, "LifxLight must be used as a context manager"
         state = self._state
         while self._running:
             # this event is rate limited by schedule_update
