@@ -1,0 +1,3 @@
+aiolifx==1.1.1
+mido==1.3.2
+python-rtmidi==1.5.8
