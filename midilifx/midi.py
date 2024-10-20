@@ -12,24 +12,33 @@ LOG = logging.getLogger(__name__)
 MIDI_CC_MODULATION = 1
 
 
-async def midi_light(midi_events: AsyncIterator[BaseMessage], channels: set[int]):
+async def midi_light(
+        midi_events: AsyncIterator[BaseMessage],
+        channels: set[int],
+        initial_transition_duration: int = 0,
+        ):
     """Changes the colors of a detected Lifx light based on MIDI messages."""
     assert channels, "midi_light is useless without channels"
     # A dict of currently playing notes and their velocities
     currently_playing: dict[int, int] = {}
-    async with LifxLight() as light:
+    async with LifxLight(initial_transition_duration=initial_transition_duration) as light:
         LOG.info("Connected to %r (%s) at %s", light.name, light.product.name, light.ip_address)
         LOG.info("Listening for MIDI events on channel(s) %s", channels)
         async for evt in midi_events:
             if getattr(evt, "channel", None) in channels:
-                LOG.debug("%s received on %d", evt.type, evt.channel)
+                LOG.debug("%s received on channel %d", evt.type, evt.channel)
                 match evt:
                     case BaseMessage(type="note_on") if evt.velocity:
                         currently_playing[evt.note] = evt.velocity
                     case BaseMessage(type="note_off"):
                         currently_playing.pop(evt.note, None)
                     case BaseMessage(type="pitchwheel"):
-                        light.set_temperature(pitch_to_temp(evt.pitch))
+                        temp = pitch_to_temp(
+                            pitch=evt.pitch,
+                            min_temp=light.product.min_kelvin,
+                            max_temp=light.product.max_kelvin,
+                        )
+                        light.set_temperature(temp)
                         # Changing color temp. already updates the bulb.
                         # No need to call set_color below.
                         continue

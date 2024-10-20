@@ -36,6 +36,7 @@ async def main():
         await midi_light(
             midi_events=to_async_iterable(inport),
             channels=args.channels,
+            initial_transition_duration=args.transition,
         )
 
 

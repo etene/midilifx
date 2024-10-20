@@ -64,12 +64,10 @@ def note_to_hsl(midi_note: int, velocity: int) -> HSLColor:
 
 
 @lru_cache(maxsize=None)
-def pitch_to_temp(pitch: int) -> int:
-    """Convert a MIDI pitch (-8192 to 8192) to a kelvin value between 2500 and 9000."""
+def pitch_to_temp(pitch: int, min_temp: int = 2500, max_temp: int = 9000) -> int:
+    """Convert a MIDI pitch (-8192 to 8192) to a kelvin value between min_temp and max_temp."""
     max_pitch = 8192
     assert -max_pitch <= pitch <= max_pitch
-    min_temp = 2500
-    max_temp = 9000
     return max_temp - int(
         (pitch + max_pitch) / (max_pitch * 2) * (max_temp - min_temp)
     )
