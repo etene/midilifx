@@ -23,9 +23,9 @@ class HSLHue(enum.IntEnum):
 
 class HSLColor(NamedTuple):
     """A triple of HSL color values."""
-    hue: HSLHue
-    saturation: int
-    lightness: int
+    hue: HSLHue  # 0 - 360
+    saturation: int  # 0 - 100
+    lightness: int  # 0 - 100
 
 
 NEWTON_HUES = {
